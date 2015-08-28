@@ -8,13 +8,9 @@ import threading
 
 
 def main():
-    threading.Timer(120.0, main).start()
+    threading.Timer(60.0, main).start()
 
-    # COMMON_WORD_FREQUENCY = 500000000
-    # COMMON_WORD_1ST_PERCENTILE = 50
-    # COMMON_WORD_2ND_PERCENTILE = 75
-    # COMMON_WORD_3RD_PERCENTILE = 90
-    # COMMON_WORD_4TH_PERCENTILE = 95
+    LOWER_LIMIT = 15
 
     # fetch a random article on wikipedia
     article_request = urllib2.urlopen("http://zh.wikipedia.org/zh-cn/Special:Random")
@@ -28,7 +24,7 @@ def main():
 
     for paragraph in content_text.find_all('p'):
         text = re.sub("\[\d+\]", '', paragraph.get_text())
-        print text
+        #print text
 
         # check if the text already in database
         cursor.execute("SELECT * FROM paragraph WHERE text = %s", text)
@@ -61,7 +57,7 @@ def main():
                 percentile_sum += percentile
                 word_cnt += 1
 
-            if word_cnt == 0:
+            if word_cnt < LOWER_LIMIT:
                 continue
             # insert the paragraph info into database
             cursor.execute("INSERT INTO paragraph (text, source, wc, avg_percentile) VALUES (%s, %s, %s, %s)",
