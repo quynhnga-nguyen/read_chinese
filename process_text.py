@@ -24,19 +24,19 @@ def main():
 
     for paragraph in content_text.find_all('p'):
         text = re.sub("\[\d+\]", '', paragraph.get_text())
-        #print text
 
         # check if the text already in database
         cursor.execute("SELECT * FROM paragraph WHERE text = %s", text)
         if not cursor.fetchone():
             word_cnt = 0
             percentile_sum = 0.0
+            percentile_list = []
 
             # analyze character frequency
             for character in text:
                 # if the character is punctuation or not Chinese, leave out
-                # set default percentile as 100
-                percentile = get_percentile(character)
+                # default percentile is 100 (most difficult)
+                percentile = get_default_percentile(character)
                 if not percentile:
                     continue
 
@@ -56,12 +56,19 @@ def main():
 
                 percentile_sum += percentile
                 word_cnt += 1
+                percentile_list.append(percentile)
 
             if word_cnt < LOWER_LIMIT:
                 continue
+
+            # find median of percentiles of characters
+            percentile_list.sort()
+            size = len(percentile_list)
+            median = (percentile_list[size / 2] + percentile_list[(size - 1) / 2]) / 2.0
+
             # insert the paragraph info into database
-            cursor.execute("INSERT INTO paragraph (text, source, wc, avg_percentile) VALUES (%s, %s, %s, %s)",
-                           (text, article_request.geturl(), word_cnt, percentile_sum / word_cnt))
+            cursor.execute("INSERT INTO paragraph (text, source, wc, avg_percentile, median_percentile) VALUES (%s, %s, %s, %s, %s)",
+                           (text, article_request.geturl(), word_cnt, percentile_sum / word_cnt, median))
             db.commit()
 
 
@@ -94,16 +101,17 @@ def look_up_hanviet(character):
     return hanviet
 
 
-def get_percentile(character):
+# returns 0 if the character is not Chinese, else returns 100 (most difficult)
+def get_default_percentile(character):
     DEFAULT_LOW_PERCENTILE = 0
     DEFAULT_HIGH_PERCENTILE = 100
 
     if re.match(re.compile(ur"\p{P}+"), character) or not re.match(re.compile(ur"[\u4e00-\u9fff]"), character):
-        percentile = DEFAULT_LOW_PERCENTILE  # not Chinese character or punctuation
+        defaul_percentile = DEFAULT_LOW_PERCENTILE  # not Chinese character or punctuation
     else:
-        percentile = DEFAULT_HIGH_PERCENTILE
+        defaul_percentile = DEFAULT_HIGH_PERCENTILE
 
-    return percentile
+    return defaul_percentile
 
 
 main()
