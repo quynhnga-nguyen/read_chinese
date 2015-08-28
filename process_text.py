@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import MySQLdb
 import re
 import threading
+import json
 
 
 def main():
@@ -18,7 +19,14 @@ def main():
     content_text = soup.find(id="mw-content-text")
 
     # connect to the database
-    db = MySQLdb.connect(host="learn-chinese.cloudapp.net", user="nga", passwd="Chinaman50100", db="chinese_lang")
+    with open('config.json') as config_file:
+        config_data = json.load(config_file)
+    host = config_data["db_host"]
+    user_name = config_data["db_user_name"]
+    password = config_data["db_password"]
+    db_name = config_data["db_name"]
+
+    db = MySQLdb.connect(host=host, user=user_name, passwd=password, db=db_name)
     db.set_character_set("utf8")
     cursor = db.cursor()
 
