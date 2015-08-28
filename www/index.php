@@ -5,16 +5,44 @@ $pdo = new PDO('mysql:host=learn-chinese.cloudapp.net;port=3306;dbname=chinese_l
     'nga', 'Chinaman50100');
 $pdo->exec("SET NAMES utf8");
 $where_clause = "";
+
+$easy = 50;
+$intermediate = 75;
+
 if (isset($_GET["difficulty"])) {
-    $where_clause = " WHERE difficulty = " . $_GET["difficulty"];
+    switch ($_GET["difficulty"]) {
+        case "1":
+            // Beginner
+            $where_clause = " AND avg_percentile < " . $easy;
+            break;
+        case "2":
+            // Intermediate
+            $where_clause = " AND avg_percentile < " . $intermediate . " AND avg_percentile >= " . $easy;
+            break;
+        case "3":
+            // Advanced
+            $where_clause = " AND avg_percentile >= " . $intermediate;
+            break;
+    }
 }
-$query = $pdo->prepare("SELECT text, difficulty FROM paragraph"
-    . $where_clause . " ORDER BY RAND() LIMIT 1");
+$query = $pdo->prepare("SELECT text, avg_percentile FROM paragraph"
+    . ", (SELECT RAND() * (SELECT MAX(id) FROM paragraph) AS tid) AS tmp"
+    . " WHERE paragraph.id >= tmp.tid " . $where_clause . " LIMIT 1;");
 $query->execute();
 $result = $query->fetch(PDO::FETCH_ASSOC);
 
 $text = $result['text'];
-$difficulty = $result['difficulty'];
+$percentile = doubleval($result['avg_percentile']);
+
+
+if ($percentile < $easy) {
+    $difficulty = "Beginner";
+} elseif ($percentile < $intermediate) {
+    $difficulty = "Intermediate";
+} else {
+    $difficulty = "Advanced";
+}
+$difficulty .= " (percentile = " . $result['avg_percentile'] . ")";
 
 $hv_query_stmt = "SELECT word, hanviet FROM frequency WHERE "
         . implode(" OR ",
