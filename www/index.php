@@ -1,8 +1,8 @@
 <?php
 header('Access-Control-Allow-Origin: *');  
 
-$pdo = new PDO('mysql:host=learn-chinese.cloudapp.net;port=3306;dbname=chinese_lang',
-    'nga', 'Chinaman50100');
+require('config.php');
+$pdo = new PDO($DB_CONN_STRING, $DB_USER_NAME, $DB_PASSWORD);
 $pdo->exec("SET NAMES utf8");
 $where_clause = "";
 
