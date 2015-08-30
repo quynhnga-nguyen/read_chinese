@@ -76,7 +76,10 @@ def main():
             # find median of percentiles of characters
             percentile_list.sort()
             size = len(percentile_list)
-            median = (percentile_list[size / 2] + percentile_list[(size - 1) / 2]) / 2.0
+            if size > 0:
+                median = (percentile_list[size / 2] + percentile_list[(size - 1) / 2]) / 2.0
+            else:
+                median = -1
 
             # insert the paragraph info into database
             cursor.execute("INSERT INTO paragraph (text, source, wc, avg_percentile, median_percentile) VALUES (%s, %s, %s, %s, %s)",
