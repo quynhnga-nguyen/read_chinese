@@ -1,5 +1,9 @@
 __author__ = 'nga'
 
+# fetch random Chinese articles from wikiapedia
+# calculate difficulty level based on individual words in the article
+# insert new words, the articles and their statistics into the database
+
 import urllib2
 from bs4 import BeautifulSoup
 import MySQLdb
