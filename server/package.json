@@ -1,0 +1,19 @@
+{
+  "name": "read-chinese",
+  "version": "0.0.0",
+  "description": "Practice chinese reading with short paragraphs",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.14.1",
+    "express": "^4.13.3",
+    "express-handlebars": "^2.0.1",
+    "handlebars": "^4.0.4",
+    "mysql": "^2.9.0",
+    "nconf": "^0.8.2"
+  }
+}
