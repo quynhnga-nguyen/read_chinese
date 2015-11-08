@@ -14,7 +14,7 @@ var intermediate = 75;
 //   2. Environment variables
 //   3. The config.json file
 //
-nconf.argv().env().file({ file: '../config.json' });
+nconf.argv().env().file({ file: __dirname + '/../config.json' });
 
 var connection = mysql.createConnection({
 	host: nconf.get('db_host'),
