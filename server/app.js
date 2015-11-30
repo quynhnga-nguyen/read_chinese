@@ -16,7 +16,8 @@ var intermediate = 75;
 //
 nconf.argv().env().file({ file: __dirname + '/../config.json' });
 
-var connection = mysql.createConnection({
+var pool = mysql.createPool({
+	connectionLimit: 10,
 	host: nconf.get('db_host'),
 	user: nconf.get('db_user_name'),
 	password: nconf.get('db_password'),
@@ -54,7 +55,7 @@ app.get('/random', function (req, res) {
 	+ ', (SELECT RAND() * (SELECT MAX(id) FROM paragraph) AS tid) AS tmp'
 	+ ' WHERE paragraph.id >= tmp.tid ' + whereClause + ' LIMIT 1;';
 
-	connection.query(query, function (err, rows) {
+	pool.query(query, function (err, rows) {
 		if (err) {
 			console.log(err);
 			return;
@@ -68,7 +69,7 @@ app.get('/paragraph', function (req, res) {
 	if ("id" in req.query) {
 		query = 'SELECT text, avg_percentile FROM paragraph WHERE id = ' + req.query.id;
 
-		connection.query(query, function (err, rows) {
+		pool.query(query, function (err, rows) {
 			if (err) {
 				console.log(err);
 				return;
@@ -106,7 +107,7 @@ app.post('/hanviet', function (req, res) {
 	query = "SELECT word, hanviet FROM frequency WHERE "
 		+ words.split('').map(function (word) { return "word = '" + word + "'"}).join(" OR ");
 	var hvMap = {};
-	connection.query(query, function (err, rows) {
+	pool.query(query, function (err, rows) {
 		rows.forEach(function (row) {
 			hvMap[row.word] = row.hanviet;
 		});
